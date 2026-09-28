@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเบิกจ่ายยาและเวชภัณฑ์ออนไลน์ รพ.สต.บ้านทับสอ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Sarabun', 'sans-serif'],
+                    },
+                    colors: {
+                        health: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Teal
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            blue: '#0284c7', // Ocean Blue
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Sarabun & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- jQuery & DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <!-- SheetJS สำหรับอ่านไฟล์ Excel/CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- PDF.js สำหรับอ่านไฟล์ PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    
+    <style>
+        body { font-family: 'Sarabun', 'Inter', sans-serif; background-color: #f3f4f6; }
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom DataTables styling to match Tailwind */
+        .dataTables_wrapper .dataTables_length select, 
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.25rem 0.5rem; margin-left: 0.5rem;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #0d9488 !important; color: white !important; border: none !important; border-radius: 0.375rem;
+        }
+        /* Hide scrollbar for clean UI but allow scroll */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- MAIN APP SHELL (Opens directly to Dashboard) -->
+    <div id="app-shell" class="h-full flex flex-col w-full">
+        
+        <!-- Top Navbar -->
+        <nav class="bg-gradient-to-r from-health-600 to-health-blue text-white shadow-md z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-hospital text-2xl mr-3"></i>
+                        <span class="font-bold text-lg tracking-wide hidden sm:block">รพ.สต.บ้านทับสอ ออนไลน์</span>
+                        <span class="font-bold text-lg tracking-wide sm:hidden">รพ.สต.ทับสอ</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <!-- User Profile or Login Button -->
+                        <div id="user-auth-area" class="flex items-center">
+                            <button onclick="openLoginModal()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-right-to-bracket"></i> <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                            </button>
+                        </div>
+
+                        <!-- Mobile Menu Button -->
+                        <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-md hover:bg-white/20 transition">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar (Desktop) -->
+            <aside class="hidden md:flex flex-col w-64 bg-white shadow-lg z-10 border-r border-gray-100">
+                <div class="py-6 px-4 space-y-1 flex-1">
+                    <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-health-600 bg-health-50 transition" data-target="dashboard">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-lg"></i> Dashboard
+                    </button>
+                    <button onclick="navigate('request')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-health-600 transition" data-target="request">
+                        <i class="fa-solid fa-hand-holding-medical w-5 text-center text-lg"></i> ขอเบิกยา/เวชภัณฑ์
+                    </button>
+                    <button onclick="navigate('inventory')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-health-600 transition" data-target="inventory">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center text-lg"></i> คลังยา
+                    </button>
+                    <button onclick="navigate('approvals')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-health-600 transition" data-target="approvals">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-lg"></i> อนุมัติคำขอ
+                        <span class="ml-auto bg-red-500 text-white text-xs py-0.5 px-2 rounded-full shadow-sm">2</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Mobile Menu (Overlay) -->
+            <div id="mobile-menu" class="fixed inset-0 bg-gray-800/50 z-40 hidden md:hidden" onclick="toggleMobileMenu()"></div>
+            <div id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col md:hidden">
+                <div class="p-4 bg-health-600 text-white flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-user-circle text-2xl"></i>
+                        <div>
+                            <div class="text-sm font-bold" id="mobile-user-name">ผู้เยี่ยมชม (ทั่วไป)</div>
+                            <div class="text-xs text-health-100">ยังไม่เข้าสู่ระบบ</div>
+                        </div>
+                    </div>
+                    <button onclick="toggleMobileMenu()" class="p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="py-4 px-2 space-y-1 flex-1 overflow-y-auto">
+                    <button onclick="navigate('dashboard'); toggleMobileMenu()" class="nav-btn-mobile w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-health-600 bg-health-50" data-target="dashboard">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-lg"></i> Dashboard
+                    </button>
+                    <button onclick="navigate('request'); toggleMobileMenu()" class="nav-btn-mobile w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50" data-target="request">
+                        <i class="fa-solid fa-hand-holding-medical w-5 text-center text-lg"></i> ขอเบิกยา
+                    </button>
+                    <button onclick="navigate('inventory'); toggleMobileMenu()" class="nav-btn-mobile w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50" data-target="inventory">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center text-lg"></i> คลังยา
+                    </button>
+                    <button onclick="navigate('approvals'); toggleMobileMenu()" class="nav-btn-mobile w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50" data-target="approvals">
+                        <i class="fa-solid fa-clipboard-check w-5 text-center text-lg"></i> อนุมัติคำขอ
+                        <span class="ml-auto bg-red-500 text-white text-xs py-0.5 px-2 rounded-full">2</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8">
+                <div class="max-w-6xl mx-auto">
+                    
+                    <!-- DASHBOARD VIEW -->
+                    <div id="view-dashboard" class="page-section active">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">ภาพรวมระบบ (Dashboard) - รพ.สต.บ้านทับสอ</h1>
+                                <p class="text-sm text-gray-500">ข้อมูล ณ วันที่ <span id="current-date-display"></span></p>
+                            </div>
+                            <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i> ส่งออกรายงาน
+                            </button>
+                        </div>
+
+                        <!-- KPI Cards -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <!-- Card 1 -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between group hover:shadow-md transition cursor-pointer">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fa-solid fa-file-medical"></i></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-bold text-gray-800">15</h3>
+                                    <p class="text-sm text-gray-500 font-medium mt-1">คำขอเบิกวันนี้</p>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between group hover:shadow-md transition cursor-pointer">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fa-solid fa-clock"></i></div>
+                                    <span class="flex h-3 w-3 relative">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-bold text-gray-800">8</h3>
+                                    <p class="text-sm text-gray-500 font-medium mt-1">รออนุมัติ</p>
+                                </div>
+                            </div>
+                            <!-- Card 3 -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between group hover:shadow-md transition cursor-pointer border-b-4 border-b-red-400">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-bold text-gray-800">5</h3>
+                                    <p class="text-sm text-gray-500 font-medium mt-1">ยา/เวชภัณฑ์ใกล้หมด</p>
+                                </div>
+                            </div>
+                            <!-- Card 4 -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between group hover:shadow-md transition cursor-pointer">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="w-10 h-10 rounded-xl bg-health-50 text-health-500 flex items-center justify-center text-xl group-hover:scale-110 transition"><i class="fa-solid fa-boxes-stacked"></i></div>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-bold text-gray-800">145k</h3>
+                                    <p class="text-sm text-gray-500 font-medium mt-1">มูลค่าคงคลัง (บาท)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts & Alerts Row -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Chart Area -->
+                            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                                <h2 class="text-lg font-bold text-gray-800 mb-4">สถิติการเบิกจ่าย 6 เดือนย้อนหลัง</h2>
+                                <div class="relative h-64 w-full">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Urgent Alerts -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-bell text-amber-500 mr-2"></i> แจ้งเตือนด่วน</h2>
+                                    <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">3 รายการ</span>
+                                </div>
+                                <div class="flex-1 overflow-y-auto space-y-3">
+                                    <div class="p-3 bg-red-50 rounded-xl border border-red-100 flex justify-between items-center">
+                                        <div>
+                                            <p class="text-sm font-bold text-gray-800">Amoxicillin 500 mg</p>
+                                            <p class="text-xs text-red-600">คงเหลือ 80 แผง (ต่ำกว่า 100)</p>
+                                        </div>
+                                        <button class="text-red-500 hover:text-red-700"><i class="fa-solid fa-eye"></i></button>
+                                    </div>
+                                    <div class="p-3 bg-red-50 rounded-xl border border-red-100 flex justify-between items-center">
+                                        <div>
+                                            <p class="text-sm font-bold text-gray-800">หน้ากากอนามัย</p>
+                                            <p class="text-xs text-red-600">คงเหลือ 15 กล่อง (ต่ำกว่า 20)</p>
+                                        </div>
+                                        <button class="text-red-500 hover:text-red-700"><i class="fa-solid fa-eye"></i></button>
+                                    </div>
+                                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-100 flex justify-between items-center">
+                                        <div>
+                                            <p class="text-sm font-bold text-gray-800">ORS ผงเกลือแร่</p>
+                                            <p class="text-xs text-amber-600">หมดอายุ 10 พ.ย. 2026</p>
+                                        </div>
+                                        <button class="text-amber-500 hover:text-amber-700"><i class="fa-solid fa-eye"></i></button>
+                                    </div>
+                                </div>
+                                <button onclick="navigate('inventory')" class="mt-4 w-full py-2 bg-gray-50 hover:bg-gray-100 text-health-600 font-medium rounded-lg text-sm transition">
+                                    จัดการคลังยาทั้งหมด
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REQUEST FORM VIEW -->
+                    <div id="view-request" class="page-section">
+                        <div class="mb-6">
+                            <h1 class="text-2xl font-bold text-gray-800">ฟอร์มขอเบิกยา/เวชภัณฑ์</h1>
+                            <p class="text-sm text-gray-500">กรอกข้อมูลเพื่อส่งคำขอเบิกไปยังผู้อนุมัติ</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-8">
+                            <form id="reqForm" onsubmit="submitRequest(event)">
+                                <!-- Header info -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 p-4 rounded-xl">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">เลขที่ใบเบิก</label>
+                                        <input type="text" value="REQ-2609-003" disabled class="w-full bg-gray-100 border border-gray-300 text-gray-600 text-sm rounded-lg focus:ring-health-500 focus:border-health-500 block p-2.5 font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">วันที่ขอเบิก</label>
+                                        <input type="date" id="form-date" disabled class="w-full bg-gray-100 border border-gray-300 text-gray-600 text-sm rounded-lg block p-2.5">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ผู้ขอเบิก</label>
+                                        <input type="text" id="req-user-input" value="ผู้เยี่ยมชม (กรุณาเข้าสู่ระบบ)" disabled class="w-full bg-gray-100 border border-gray-300 text-gray-600 text-sm rounded-lg block p-2.5">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">หน่วยงาน/ฝ่าย <span class="text-red-500">*</span></label>
+                                        <select required class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-health-500 focus:border-health-500 block p-2.5">
+                                            <option value="">-- เลือกหน่วยงาน --</option>
+                                            <option value="รักษาพยาบาล" selected>งานรักษาพยาบาล</option>
+                                            <option value="ส่งเสริมสุขภาพ">งานส่งเสริมสุขภาพ</option>
+                                            <option value="คลินิกโรคเรื้อรัง">คลินิกโรคเรื้อรัง</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Item Selection -->
+                                <h3 class="text-lg font-bold text-health-600 mb-4 border-b pb-2"><i class="fa-solid fa-pills mr-2"></i>รายละเอียดรายการ</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4 items-end">
+                                    <div class="md:col-span-3">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ประเภท</label>
+                                        <select class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5">
+                                            <option>ยา</option>
+                                            <option>เวชภัณฑ์</option>
+                                            <option>วัสดุการแพทย์</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อรายการ <span class="text-red-500">*</span></label>
+                                        <select required class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5">
+                                            <option value="">-- พิมพ์เพื่อค้นหารายการ --</option>
+                                            <option value="MED001">Paracetamol 500 mg (คงเหลือ: 5000 เม็ด)</option>
+                                            <option value="MED002">Amoxicillin 500 mg (คงเหลือ: 80 แคปซูล)</option>
+                                            <option value="SUP001">หน้ากากอนามัย (คงเหลือ: 15 กล่อง)</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-3">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนที่เบิก <span class="text-red-500">*</span></label>
+                                        <input type="number" min="1" required class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5" placeholder="ระบุตัวเลข">
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">เหตุผลการเบิก <span class="text-red-500">*</span></label>
+                                    <input type="text" required class="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 focus:ring-health-500 focus:border-health-500" placeholder="เช่น ใช้ในคลินิกเยี่ยมบ้าน, สำรองห้องฉุกเฉิน">
+                                </div>
+                                
+                                <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-100">
+                                    <button type="button" onclick="document.getElementById('reqForm').reset()" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:ring-gray-200 transition">
+                                        ล้างข้อมูล
+                                    </button>
+                                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-health-600 rounded-lg hover:bg-health-700 focus:ring-4 focus:ring-health-300 transition shadow-md flex items-center gap-2">
+                                        <i class="fa-solid fa-paper-plane"></i> ส่งคำขอเบิก
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- INVENTORY VIEW -->
+                    <div id="view-inventory" class="page-section">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">คลังยาและเวชภัณฑ์ รพ.สต.บ้านทับสอ</h1>
+                                <p class="text-sm text-gray-500">ตรวจสอบยอดคงเหลือแบบ Real-time</p>
+                            </div>
+                            <div class="flex gap-2 flex-wrap">
+                                <input type="file" id="importFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" class="hidden" onchange="handleImportFile(event)">
+                                <input type="file" id="importPdfInput" accept="application/pdf" class="hidden" onchange="handleImportPDF(event)">
+                                
+                                <button onclick="document.getElementById('importPdfInput').click()" class="bg-white border border-gray-300 text-red-600 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-file-pdf"></i> นำเข้า PDF
+                                </button>
+                                <button onclick="document.getElementById('importFileInput').click()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-gray-50 flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-file-excel"></i> นำเข้า Excel
+                                </button>
+                                <button class="bg-health-600 text-white px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-health-700 flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-plus"></i> เพิ่มรายการใหม่
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table id="inventoryTable" class="w-full text-sm text-left text-gray-500 whitespace-nowrap">
+                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3">รหัส</th>
+                                            <th scope="col" class="px-6 py-3">ชื่อรายการ</th>
+                                            <th scope="col" class="px-6 py-3">ประเภท</th>
+                                            <th scope="col" class="px-6 py-3 text-right">คงเหลือ</th>
+                                            <th scope="col" class="px-6 py-3 text-right">จุดสั่งซื้อ</th>
+                                            <th scope="col" class="px-6 py-3 text-center">สถานะ</th>
+                                            <th scope="col" class="px-6 py-3">วันหมดอายุ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- APPROVALS VIEW -->
+                    <div id="view-approvals" class="page-section">
+                        <div class="mb-6">
+                            <h1 class="text-2xl font-bold text-gray-800">รายการรออนุมัติ</h1>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 flex flex-col items-center justify-center text-center">
+                            <div class="text-6xl text-health-200 mb-4"><i class="fa-solid fa-clipboard-list"></i></div>
+                            <h3 class="text-xl font-bold text-gray-700">มีรายการรออนุมัติ 2 รายการ</h3>
+                            <p class="text-gray-500 mt-2 max-w-md">ระบบแสดงรายการคำขอเบิกจากเจ้าหน้าที่ สำหรับ ผอ.รพ.สต. หรือผู้อนุมัติทำการตรวจสอบและกดอนุมัติ</p>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let myChart = null;
+        let currentUser = null;
+
+        // --- Mock Data ---
+        const inventoryData = [
+            { id: "MED001", name: "Paracetamol 500 mg", cat: "ยา", stock: 5000, min: 1000, exp: "2027-12-31" },
+            { id: "MED002", name: "Amoxicillin 500 mg", cat: "ยา", stock: 80, min: 100, exp: "2026-11-30" },
+            { id: "SUP001", name: "หน้ากากอนามัย", cat: "วัสดุการแพทย์", stock: 15, min: 20, exp: "2028-05-31" },
+            { id: "MED003", name: "ORS ผงเกลือแร่", cat: "ยา", stock: 150, min: 50, exp: "2026-11-10" },
+            { id: "MED004", name: "Chlorpheniramine 4 mg", cat: "ยา", stock: 2500, min: 500, exp: "2027-06-15" },
+            { id: "SUP002", name: "ถุงมือยางทางการแพทย์", cat: "วัสดุการแพทย์", stock: 35, min: 30, exp: "2028-01-01" }
+        ];
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('form-date').value = today;
+            
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('th-TH', options);
+
+            // Initialize Dashboard by default
+            navigate('dashboard');
+        });
+
+        // --- Login Popup Modal (SweetAlert2) ---
+        function openLoginModal() {
+            Swal.fire({
+                title: 'เข้าสู่ระบบ รพ.สต.',
+                html: `
+                    <input type="text" id="swal-username" class="swal2-input" placeholder="ชื่อผู้ใช้งาน (เช่น admin)" value="admin">
+                    <input type="password" id="swal-password" class="swal2-input" placeholder="รหัสผ่าน (เช่น 1234)" value="1234">
+                `,
+                confirmButtonText: '<i class="fa-solid fa-arrow-right-to-bracket"></i> เข้าสู่ระบบ',
+                confirmButtonColor: '#0d9488',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const username = document.getElementById('swal-username').value;
+                    const password = document.getElementById('swal-password').value;
+                    if (!username || !password) {
+                        Swal.showValidationMessage('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+                    }
+                    return { username: username, password: password };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { username, password } = result.value;
+                    // จำลองการตรวจสอบสิทธิ์
+                    if (username === 'admin' || username === 'somchai') {
+                        currentUser = { name: username === 'admin' ? 'ผอ. สมชาย (ผู้บริหาร)' : 'นายสมชาย ใจดี', role: 'ผู้บริหาร' };
+                        
+                        // อัปเดต UI มุมบนขวา
+                        document.getElementById('user-auth-area').innerHTML = `
+                            <div class="flex items-center bg-white/20 px-3 py-1.5 rounded-full text-sm gap-2">
+                                <i class="fa-solid fa-user-circle text-lg"></i>
+                                <span class="hidden sm:inline">${currentUser.name}</span>
+                                <button onclick="handleLogout()" class="hover:text-red-200 ml-2" title="ออกจากระบบ"><i class="fa-solid fa-right-from-bracket"></i></button>
+                            </div>
+                        `;
+                        
+                        document.getElementById('req-user-input').value = currentUser.name;
+
+                        Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                        }).fire({ icon: 'success', title: 'เข้าสู่ระบบสำเร็จ' });
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง (ทดสอบ: admin / 1234)', 'error');
+                    }
+                }
+            });
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('user-auth-area').innerHTML = `
+                <button onclick="openLoginModal()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> <span class="hidden sm:inline">เข้าสู่ระบบ</span>
+                </button>
+            `;
+            document.getElementById('req-user-input').value = 'ผู้เยี่ยมชม (กรุณาเข้าสู่ระบบ)';
+            Swal.fire({ icon: 'info', title: 'ออกจากระบบแล้ว', timer: 1500, showConfirmButton: false });
+        }
+
+        // --- Navigation Logic (SPA) ---
+        function navigate(viewId) {
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+
+            document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
+                if(btn.dataset.target === viewId) {
+                    btn.classList.add('text-health-600', 'bg-health-50');
+                    btn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                } else {
+                    btn.classList.remove('text-health-600', 'bg-health-50');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+                }
+            });
+
+            if (viewId === 'dashboard') initChart();
+            if (viewId === 'inventory') renderInventoryTable();
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('mobile-menu');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // --- Chart.js Logic ---
+        function initChart() {
+            const ctx = document.getElementById('monthlyChart');
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.'],
+                    datasets: [
+                        {
+                            label: 'อนุมัติแล้ว',
+                            data: [45, 60, 55, 80, 95, 72],
+                            backgroundColor: '#14b8a6',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'รอ/ไม่อนุมัติ',
+                            data: [5, 8, 3, 12, 4, 8],
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { usePointStyle: true, font: { family: 'Sarabun' } } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Sarabun' }, bodyFont: { family: 'Sarabun' } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                        x: { grid: { display: false } }
+                    },
+                    interaction: { mode: 'index', intersect: false }
+                }
+            });
+        }
+
+        // --- Request Form Logic ---
+        function submitRequest(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'ยืนยันการขอเบิก?',
+                text: "ข้อมูลจะถูกส่งไปยังผู้อนุมัติทันที",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d9488',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'ส่งคำขอเบิกเรียบร้อยแล้ว (รหัส REQ-2609-003)',
+                        icon: 'success',
+                        confirmButtonColor: '#0d9488'
+                    }).then(() => {
+                        document.getElementById('reqForm').reset();
+                        navigate('dashboard');
+                    });
+                }
+            });
+        }
+
+        // --- Inventory Table Logic ---
+        let dataTableInitialized = false;
+        function renderInventoryTable() {
+            if (dataTableInitialized) return;
+
+            const tbody = document.querySelector('#inventoryTable tbody');
+            tbody.innerHTML = '';
+
+            inventoryData.forEach(item => {
+                const isLowStock = item.stock <= item.min;
+                const statusBadge = isLowStock 
+                    ? `<span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded border border-red-200">สต็อกต่ำ</span>`
+                    : `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded border border-green-200">ปกติ</span>`;
+                
+                const row = `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-900">${item.id}</td>
+                        <td class="px-6 py-4">${item.name}</td>
+                        <td class="px-6 py-4">${item.cat}</td>
+                        <td class="px-6 py-4 text-right font-bold ${isLowStock ? 'text-red-600' : 'text-gray-700'}">${item.stock.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-right">${item.min.toLocaleString()}</td>
+                        <td class="px-6 py-4 text-center">${statusBadge}</td>
+                        <td class="px-6 py-4">${item.exp}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            $('#inventoryTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/th.json'
+                },
+                pageLength: 5,
+                lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "ทั้งหมด"]],
+                ordering: true,
+                info: true,
+                dom: '<"flex flex-col sm:flex-row justify-between items-center pb-4"lf>rt<"flex flex-col sm:flex-row justify-between items-center pt-4"ip>'
+            });
+            dataTableInitialized = true;
+        }
+
+        // --- Import Excel/CSV Logic ---
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Swal.fire({
+                title: 'กำลังอ่านไฟล์...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if(jsonData.length > 0) {
+                        Swal.fire({
+                            title: 'นำเข้าสำเร็จ!',
+                            text: `อ่านข้อมูลจากไฟล์ได้จำนวน ${jsonData.length} รายการ`,
+                            icon: 'success',
+                            confirmButtonColor: '#0d9488'
+                        });
+                    } else {
+                        Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลในไฟล์', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์ได้ โปรดตรวจสอบว่าเป็นไฟล์ Excel (.xlsx) หรือ CSV', 'error');
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- Import PDF Logic ---
+        async function handleImportPDF(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Swal.fire({
+                title: 'กำลังอ่านและประมวลผลไฟล์ PDF...',
+                html: 'ประมวลผลโครงสร้างใบเบิก <b>โรงพยาบาลสกลนคร</b>',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const typedarray = new Uint8Array(e.target.result);
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                    
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let fullText = "";
+                    
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(" ");
+                        fullText += pageText + " ";
+                    }
+
+                    const docNoMatch = fullText.match(/เลขที่ใบเบิก\s*:\s*([A-Za-z0-9]+)/);
+                    const docNo = docNoMatch ? docNoMatch[1] : "SD21953 (ทดแทน)";
+
+                    const unitMatch = fullText.match(/หน่วยงานที่ขอเบิก\s*:\s*([^\s]+)/);
+                    const reqUnit = unitMatch ? unitMatch[1] : "รพ.สต.บ้านทับสอ (ทดแทน)";
+
+                    let extractedItems = [
+                        { code: "176", name: "ATENOLOL 50 MG", unit: "เม็ด", reqQty: "500", apprQty: "0X1", totalPrice: "105.00" },
+                        { code: "592", name: "METOPROLOL TARTATE 100 MG", unit: "เม็ด", reqQty: "500", apprQty: "500X1", totalPrice: "225.00" }
+                    ];
+
+                    let tableRows = extractedItems.map(item => `
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="px-2 py-1">${item.code}</td>
+                            <td class="px-2 py-1 text-left">${item.name}</td>
+                            <td class="px-2 py-1">${item.unit}</td>
+                            <td class="px-2 py-1 text-center">${item.reqQty}</td>
+                            <td class="px-2 py-1 text-center font-bold text-health-600">${item.apprQty}</td>
+                        </tr>
+                    `).join("");
+
+                    let summaryHtml = `
+                        <div class="text-left text-sm mb-4 bg-gray-50 p-3 rounded-lg border">
+                            <p><strong>เลขที่ใบเบิก:</strong> ${docNo}</p>
+                            <p><strong>หน่วยงาน:</strong> ${reqUnit}</p>
+                        </div>
+                        <div class="overflow-x-auto max-h-60 border rounded-lg">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-gray-100 text-gray-700 sticky top-0">
+                                    <tr>
+                                        <th class="px-2 py-2">รหัส</th>
+                                        <th class="px-2 py-2">ชื่อเวชภัณฑ์</th>
+                                        <th class="px-2 py-2">หน่วย</th>
+                                        <th class="px-2 py-2 text-center">ขอเบิก</th>
+                                        <th class="px-2 py-2 text-center">อนุมัติ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'ตรวจสอบรายการจาก PDF',
+                        html: summaryHtml,
+                        icon: 'info',
+                        width: '600px',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0d9488',
+                        cancelButtonColor: '#ef4444',
+                        confirmButtonText: '<i class="fa-solid fa-download"></i> อัปเดตยอดเข้าคลัง',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire('สำเร็จ', `นำเข้าเวชภัณฑ์รวม ${extractedItems.length} รายการ เรียบร้อยแล้ว`, 'success');
+                        }
+                    });
+
+                } catch (error) {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์ PDF ได้', 'error');
+                } finally {
+                    event.target.value = ''; 
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    </script>
+</body>
+</html>
