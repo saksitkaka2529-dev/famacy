@@ -22,7 +22,13 @@
       --red: #c53030;
       --red-soft: #fff0f0;
       --violet: #6b46c1;
+      --cyan: #0891b2;
+      --gold: #c58b11;
+      --rose: #e11d48;
+      --deep: #06323a;
+      --surface: rgba(255, 255, 255, .86);
       --shadow: 0 14px 42px rgba(23, 51, 58, .08);
+      --shadow-strong: 0 20px 55px rgba(24, 52, 62, .14);
       --radius: 8px;
     }
 
@@ -222,21 +228,26 @@
       border: 1px solid transparent;
       border-radius: 7px;
       padding: 9px 14px;
-      background: var(--primary);
+      background: linear-gradient(135deg, #0f766e, #0891b2);
       color: #ffffff;
       font-weight: 800;
       text-decoration: none;
       white-space: nowrap;
+      box-shadow: 0 10px 22px rgba(15, 118, 110, .16);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
     }
 
     .btn:hover {
-      background: var(--primary-dark);
+      background: linear-gradient(135deg, var(--primary-dark), #0369a1);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(15, 118, 110, .2);
     }
 
     .btn.secondary {
-      background: #ffffff;
+      background: rgba(255, 255, 255, .92);
       color: var(--primary);
       border-color: #a7cbc5;
+      box-shadow: 0 8px 18px rgba(23, 51, 58, .06);
     }
 
     .btn.secondary:hover {
@@ -244,15 +255,15 @@
     }
 
     .btn.blue {
-      background: var(--blue);
+      background: linear-gradient(135deg, #0369a1, #7c3aed);
     }
 
     .btn.blue:hover {
-      background: #075985;
+      background: linear-gradient(135deg, #075985, #6d28d9);
     }
 
     .btn.warn {
-      background: var(--amber);
+      background: linear-gradient(135deg, #b7791f, #c58b11);
     }
 
     .btn.warn:hover {
@@ -260,7 +271,7 @@
     }
 
     .btn.danger {
-      background: var(--red);
+      background: linear-gradient(135deg, #c53030, #e11d48);
     }
 
     .btn.danger:hover {
@@ -318,6 +329,9 @@
       min-height: 100vh;
       display: grid;
       grid-template-columns: 270px minmax(0, 1fr);
+      background:
+        linear-gradient(135deg, rgba(232, 247, 239, .9), rgba(230, 243, 251, .72) 42%, rgba(255, 247, 223, .58)),
+        #f6fbf9;
     }
 
     .sidebar {
@@ -327,7 +341,11 @@
       overflow: auto;
       padding: 18px;
       color: #e9fffb;
-      background: #073b3a;
+      background:
+        linear-gradient(155deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, 0) 35%),
+        linear-gradient(180deg, #06323a 0%, #074946 54%, #072f38 100%);
+      border-right: 1px solid rgba(255, 255, 255, .18);
+      box-shadow: 14px 0 36px rgba(6, 50, 58, .16);
     }
 
     .app-logo {
@@ -343,9 +361,10 @@
       height: 42px;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(255, 255, 255, .22);
+      border: 1px solid rgba(255, 255, 255, .34);
       border-radius: 12px;
-      background: rgba(255, 255, 255, .09);
+      background: linear-gradient(145deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, .08));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 10px 28px rgba(0, 0, 0, .18);
       font-weight: 900;
       font-size: 22px;
     }
@@ -354,6 +373,7 @@
       display: block;
       font-size: 15px;
       line-height: 1.35;
+      color: #ffffff;
     }
 
     .app-logo span {
@@ -376,16 +396,24 @@
       border-radius: 7px;
       padding: 9px 11px;
       color: #daf2ee;
-      background: transparent;
+      background: rgba(255, 255, 255, .04);
       font-weight: 800;
       text-align: left;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
     }
 
     .nav-btn:hover,
     .nav-btn.active {
-      background: rgba(255, 255, 255, .1);
-      border-color: rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .16);
+      border-color: rgba(255, 255, 255, .22);
       color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+      transform: translateX(2px);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(20, 184, 166, .34), rgba(3, 105, 161, .24));
+      border-color: rgba(255, 255, 255, .3);
     }
 
     .nav-icon {
@@ -394,7 +422,8 @@
       display: grid;
       place-items: center;
       border-radius: 7px;
-      background: rgba(255, 255, 255, .12);
+      background: rgba(255, 255, 255, .16);
+      border: 1px solid rgba(255, 255, 255, .16);
       font-size: 13px;
       flex: 0 0 24px;
     }
@@ -406,6 +435,9 @@
       color: #baded9;
       font-size: 13px;
       line-height: 1.55;
+      background: rgba(255, 255, 255, .06);
+      border-radius: var(--radius);
+      padding: 14px;
     }
 
     .main-area {
@@ -424,9 +456,10 @@
       justify-content: space-between;
       gap: 14px;
       padding: 14px 22px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(245, 250, 248, .94);
+      border-bottom: 1px solid rgba(215, 231, 228, .78);
+      background: rgba(255, 255, 255, .82);
       backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(23, 51, 58, .06);
     }
 
     .mobile-menu-btn {
@@ -435,15 +468,16 @@
 
     .page-kicker {
       display: block;
-      color: var(--muted);
+      color: var(--primary);
       font-size: 13px;
       font-weight: 700;
     }
 
     .page-title {
       margin: 1px 0 0;
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1.25;
+      color: #0c2f37;
     }
 
     .topbar-actions {
@@ -463,10 +497,11 @@
       padding: 6px 10px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: #ffffff;
+      background: rgba(255, 255, 255, .9);
       color: var(--muted);
       font-size: 13px;
       font-weight: 800;
+      box-shadow: 0 8px 20px rgba(23, 51, 58, .05);
     }
 
     .dot {
@@ -483,6 +518,8 @@
 
     .content {
       padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 260px);
     }
 
     .toolbar {
@@ -524,22 +561,187 @@
       margin-bottom: 16px;
     }
 
+    .dashboard-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 16px;
+      padding: 22px;
+      border-radius: 10px;
+      color: #ffffff;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(125deg, #07565b 0%, #0f766e 46%, #0b6b8f 100%);
+      box-shadow: var(--shadow-strong);
+      overflow: hidden;
+    }
+
+    .dashboard-hero h2 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(26px, 3vw, 36px);
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .dashboard-hero p {
+      max-width: 780px;
+      margin: 10px 0 0;
+      color: rgba(255, 255, 255, .86);
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .hero-actions .btn {
+      background: rgba(255, 255, 255, .94);
+      color: #07565b;
+      border-color: rgba(255, 255, 255, .42);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+
+    .hero-actions .btn.secondary {
+      background: rgba(255, 255, 255, .12);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, .32);
+    }
+
+    .hero-status {
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+    }
+
+    .hero-status strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .hero-status span {
+      color: rgba(255, 255, 255, .8);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .status-chip-row,
+    .quick-action-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .status-chip {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .12);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .quick-action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .quick-action {
+      min-height: 82px;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      border: 1px solid rgba(215, 231, 228, .9);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: rgba(255, 255, 255, .86);
+      color: var(--ink);
+      text-align: left;
+      box-shadow: 0 12px 30px rgba(23, 51, 58, .06);
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-2px);
+      border-color: rgba(15, 118, 110, .34);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .quick-action strong {
+      color: #123a42;
+      font-size: 15px;
+    }
+
+    .quick-action span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
     .metric-card,
     .panel,
     .table-panel,
     .alert-box {
-      border: 1px solid var(--line);
+      border: 1px solid rgba(215, 231, 228, .88);
       border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: 0 8px 28px rgba(23, 51, 58, .04);
+      background: var(--surface);
+      box-shadow: 0 12px 34px rgba(23, 51, 58, .07);
     }
 
     .metric-card {
       min-height: 112px;
-      padding: 15px;
+      padding: 16px;
       display: grid;
       align-content: space-between;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
     }
+
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: var(--metric-accent, var(--primary));
+      z-index: -1;
+    }
+
+    .metric-card::after {
+      content: "";
+      position: absolute;
+      top: -44px;
+      right: -34px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--metric-accent, var(--primary)) 18%, transparent);
+      z-index: -1;
+    }
+
+    .metric-card.accent-teal { --metric-accent: #0f766e; }
+    .metric-card.accent-sky { --metric-accent: #0369a1; }
+    .metric-card.accent-emerald { --metric-accent: #16a34a; }
+    .metric-card.accent-amber { --metric-accent: #c58b11; }
+    .metric-card.accent-rose { --metric-accent: #e11d48; }
+    .metric-card.accent-violet { --metric-accent: #7c3aed; }
 
     .metric-card span {
       color: var(--muted);
@@ -551,8 +753,9 @@
     .metric-card strong {
       display: block;
       margin-top: 8px;
-      font-size: 27px;
+      font-size: 30px;
       line-height: 1;
+      color: #102f36;
     }
 
     .metric-card small {
@@ -562,7 +765,8 @@
     }
 
     .panel {
-      padding: 16px;
+      padding: 18px;
+      backdrop-filter: blur(8px);
     }
 
     .panel h2,
@@ -570,6 +774,7 @@
       margin: 0 0 12px;
       font-size: 18px;
       line-height: 1.35;
+      color: #123a42;
     }
 
     .panel-subtitle {
@@ -580,6 +785,7 @@
 
     .table-panel {
       overflow: hidden;
+      backdrop-filter: blur(8px);
     }
 
     .table-header {
@@ -589,6 +795,7 @@
       gap: 12px;
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(232, 247, 239, .8), rgba(230, 243, 251, .68));
       flex-wrap: wrap;
     }
 
@@ -619,7 +826,7 @@
 
     th {
       color: #355c63;
-      background: #f4faf8;
+      background: linear-gradient(180deg, #f5fbfa, #eef8f7);
       font-size: 13px;
       white-space: nowrap;
     }
@@ -939,6 +1146,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .quick-action-grid {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
       .filters {
         grid-template-columns: repeat(3, minmax(150px, 1fr));
       }
@@ -985,6 +1196,7 @@
       .grid.two,
       .grid.three,
       .split-summary,
+      .dashboard-hero,
       .alert-grid {
         grid-template-columns: 1fr;
       }
@@ -1024,9 +1236,19 @@
       .login-metrics,
       .quick-users,
       .metric-grid,
+      .quick-action-grid,
       .grid.four,
       .filters {
         grid-template-columns: 1fr;
+      }
+
+      .dashboard-hero {
+        padding: 18px;
+      }
+
+      .dashboard-hero h2 {
+        font-size: 24px;
+        word-break: break-word;
       }
 
       .topbar {
@@ -1495,13 +1717,60 @@
         const maxMonth = Math.max(...data.monthly.map(item => item.count), 1);
         const maxTop = Math.max(...data.topItems.map(item => item.qty), 1);
         setContent(`
+          <section class="dashboard-hero">
+            <div>
+              <h2>ศูนย์ควบคุมการเบิกจ่ายยาและเวชภัณฑ์ รพ.สต.บ้านทับสอ</h2>
+              <p>ติดตามคำขอเบิก อนุมัติ จ่ายยา ตัดสต็อก แจ้งเตือนรายการใกล้หมด และดูมูลค่าคงคลังได้จากหน้าจอเดียว พร้อมใช้งานทั้งคลังยา เจ้าหน้าที่ และผู้บริหาร</p>
+              <div class="status-chip-row">
+                <span class="status-chip">รออนุมัติ ${number(data.pending)} รายการ</span>
+                <span class="status-chip">ใกล้หมด ${number(data.lowStock.length)} รายการ</span>
+                <span class="status-chip">ใกล้หมดอายุ ${number(data.nearExpiry.length)} รายการ</span>
+              </div>
+              <div class="hero-actions">
+                <button class="btn" type="button" data-tab="request">สร้างคำขอเบิก</button>
+                <button class="btn secondary" type="button" data-tab="inventory">ตรวจคลังยา</button>
+                <button class="btn secondary" type="button" data-tab="reports">เปิดรายงาน</button>
+              </div>
+            </div>
+            <div class="hero-status">
+              <div>
+                <span>มูลค่าสต็อกคงเหลือ</span>
+                <strong>${money(data.stockValue)}</strong>
+                <span>บาท</span>
+              </div>
+              <div>
+                <span>ข้อมูลล่าสุด</span>
+                <strong style="font-size:20px;">${escapeHtml(nowText())}</strong>
+              </div>
+            </div>
+          </section>
+
+          <div class="quick-action-grid">
+            <button class="quick-action" type="button" data-tab="requests">
+              <strong>ติดตามคำขอเบิก</strong>
+              <span>ค้นหา กรองสถานะ และพิมพ์ใบเบิก</span>
+            </button>
+            <button class="quick-action" type="button" data-tab="approve">
+              <strong>อนุมัติออนไลน์</strong>
+              <span>ตรวจคำขอที่รออนุมัติแบบทันที</span>
+            </button>
+            <button class="quick-action" type="button" data-tab="dispense">
+              <strong>จ่ายยา/ตัดสต็อก</strong>
+              <span>ตรวจยอดคงเหลือก่อนจ่ายจริง</span>
+            </button>
+            <button class="quick-action" type="button" data-tab="reports">
+              <strong>รายงานผู้บริหาร</strong>
+              <span>สรุปยอดเบิกจ่ายและคงคลัง</span>
+            </button>
+          </div>
+
           <div class="metric-grid">
-            ${metricCard("คำขอวันนี้", data.todayRequests, "รายการ")}
-            ${metricCard("รออนุมัติ", data.pending, "รายการ")}
-            ${metricCard("จ่ายแล้ว", data.paid, "รายการ")}
-            ${metricCard("ใกล้หมด", data.lowStock.length, "รายการ")}
-            ${metricCard("ใกล้หมดอายุ", data.nearExpiry.length, "รายการ")}
-            ${metricCard("มูลค่าสต็อก", money(data.stockValue), "บาท")}
+            ${metricCard("คำขอวันนี้", data.todayRequests, "รายการ", "teal")}
+            ${metricCard("รออนุมัติ", data.pending, "รายการ", "amber")}
+            ${metricCard("จ่ายแล้ว", data.paid, "รายการ", "emerald")}
+            ${metricCard("ใกล้หมด", data.lowStock.length, "รายการ", "rose")}
+            ${metricCard("ใกล้หมดอายุ", data.nearExpiry.length, "รายการ", "violet")}
+            ${metricCard("มูลค่าสต็อก", money(data.stockValue), "บาท", "sky")}
           </div>
 
           <div class="split-summary">
@@ -2245,7 +2514,12 @@
       function handleDocumentClick(event) {
         const tabBtn = event.target.closest("[data-tab]");
         if (tabBtn) {
-          activeTab = tabBtn.dataset.tab;
+          const nextTab = tabBtn.dataset.tab;
+          if (!allowedTabs().some(tab => tab.id === nextTab)) {
+            toast("สิทธิ์ผู้ใช้งานนี้ยังไม่สามารถเปิดเมนูดังกล่าวได้", "warn");
+            return;
+          }
+          activeTab = nextTab;
           renderApp();
           return;
         }
@@ -2478,9 +2752,11 @@
         URL.revokeObjectURL(url);
       }
 
-      function metricCard(label, value, suffix) {
+      function metricCard(label, value, suffix, accent) {
+        const accents = ["teal", "sky", "emerald", "amber", "rose", "violet"];
+        const pickedAccent = accent || accents[Math.abs(Array.from(String(label)).reduce((sum, char) => sum + char.charCodeAt(0), 0)) % accents.length];
         return `
-          <article class="metric-card">
+          <article class="metric-card accent-${pickedAccent}">
             <span>${escapeHtml(label)}</span>
             <strong>${typeof value === "number" ? number(value) : escapeHtml(String(value))}</strong>
             <small>${escapeHtml(suffix || "")}</small>
