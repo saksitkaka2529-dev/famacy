@@ -1364,7 +1364,7 @@
     (function () {
       "use strict";
 
-      const LOCAL_KEY = "medreq.state.v1";
+      const LOCAL_KEY = "medreq.state.v2.empty";
       const GAS_URL_KEY = "medreq.gasUrl";
       const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbwn7-PpE86012uPb4mjg2Ok6ER9Yl5hUrxwlq99FUJVU1IaVEyu0YXNPZp6qYSbB6ho/exec";
       const MAX_IMPORT_FILE_BYTES = 8 * 1024 * 1024;
@@ -1409,60 +1409,8 @@
             { username: "admin", password: "1234", name: "ผู้ดูแลระบบ", role: "admin", department: "เทคโนโลยีสารสนเทศ", active: true },
             { username: "executive", password: "1234", name: "ผู้บริหาร", role: "executive", department: "บริหาร", active: true }
           ],
-          inventory: [
-            { itemId: "MED001", name: "Paracetamol 500 mg", category: "ยา", unit: "เม็ด", stock: 1250, minStock: 300, expiryDate: "2027-02-15", lotNumber: "PCT-2601", unitPrice: 0.45 },
-            { itemId: "MED002", name: "Amoxicillin 500 mg", category: "ยา", unit: "แคปซูล", stock: 420, minStock: 200, expiryDate: "2027-04-20", lotNumber: "AMX-2602", unitPrice: 1.8 },
-            { itemId: "MED003", name: "ORS", category: "ยา", unit: "ซอง", stock: 88, minStock: 120, expiryDate: "2026-12-10", lotNumber: "ORS-2601", unitPrice: 2.4 },
-            { itemId: "SUP001", name: "หน้ากากอนามัย", category: "เวชภัณฑ์", unit: "ชิ้น", stock: 860, minStock: 500, expiryDate: "2029-01-01", lotNumber: "MSK-2603", unitPrice: 1.1 },
-            { itemId: "SUP002", name: "ถุงมือ Disposable", category: "เวชภัณฑ์", unit: "คู่", stock: 240, minStock: 300, expiryDate: "2028-08-30", lotNumber: "GLV-2602", unitPrice: 1.6 },
-            { itemId: "SUP003", name: "Alcohol 70% 450 ml", category: "เวชภัณฑ์", unit: "ขวด", stock: 52, minStock: 40, expiryDate: "2027-03-18", lotNumber: "ALC-2601", unitPrice: 38 },
-            { itemId: "MAT001", name: "สำลีปลอดเชื้อ", category: "วัสดุการแพทย์", unit: "ห่อ", stock: 66, minStock: 50, expiryDate: "2028-06-15", lotNumber: "COT-2601", unitPrice: 25 },
-            { itemId: "MAT002", name: "แผ่นตรวจน้ำตาล", category: "วัสดุการแพทย์", unit: "แผ่น", stock: 190, minStock: 120, expiryDate: "2026-11-05", lotNumber: "GLU-2601", unitPrice: 7.5 }
-          ],
-          requests: [
-            {
-              requestId: "REQ-" + todayIso().replaceAll("-", "") + "-001",
-              requestDate: todayIso(),
-              requesterUsername: "staff",
-              requesterName: "เจ้าหน้าที่ รพ.สต.",
-              department: "งานรักษาพยาบาล",
-              status: "รออนุมัติ",
-              reason: "ใช้ในคลินิก",
-              note: "",
-              approvedBy: "",
-              approvedAt: "",
-              rejectedReason: "",
-              dispensedBy: "",
-              dispensedAt: "",
-              createdAt: nowText(),
-              updatedAt: nowText(),
-              items: [
-                { itemId: "MED001", itemName: "Paracetamol 500 mg", category: "ยา", unit: "เม็ด", quantity: 120, dispensedQuantity: 0 },
-                { itemId: "SUP001", itemName: "หน้ากากอนามัย", category: "เวชภัณฑ์", unit: "ชิ้น", quantity: 100, dispensedQuantity: 0 }
-              ]
-            },
-            {
-              requestId: "REQ-20260920-001",
-              requestDate: "2026-09-20",
-              requesterUsername: "staff",
-              requesterName: "เจ้าหน้าที่ รพ.สต.",
-              department: "งานส่งเสริมสุขภาพ",
-              status: "จ่ายแล้ว",
-              reason: "เยี่ยมบ้าน",
-              note: "",
-              approvedBy: "ผอ.รพ.สต.",
-              approvedAt: "20 ก.ย. 2569 09:15",
-              rejectedReason: "",
-              dispensedBy: "เจ้าหน้าที่คลังยา",
-              dispensedAt: "20 ก.ย. 2569 10:05",
-              createdAt: "20 ก.ย. 2569 08:55",
-              updatedAt: "20 ก.ย. 2569 10:05",
-              items: [
-                { itemId: "MED003", itemName: "ORS", category: "ยา", unit: "ซอง", quantity: 60, dispensedQuantity: 60 },
-                { itemId: "SUP002", itemName: "ถุงมือ Disposable", category: "เวชภัณฑ์", unit: "คู่", quantity: 40, dispensedQuantity: 40 }
-              ]
-            }
-          ],
+          inventory: [],
+          requests: [],
           imports: [],
           audit: [],
           movements: []
